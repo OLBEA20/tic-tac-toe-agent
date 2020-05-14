@@ -1,5 +1,5 @@
-from random import choice, random
 from collections import Counter
+from random import choice, random
 from typing import Optional
 
 from src.game import Game
@@ -8,8 +8,9 @@ from src.position import Position
 
 class QLearningAgent:
     def __init__(
-        self, alpha=1.0, epsilon=0.05, discount=0.8,
+        self, name: str, alpha=1.0, epsilon=0.25, discount=0.8,
     ):
+        self.name = name
         self.alpha = alpha
         self.epsilon = epsilon
         self.discount = discount
@@ -60,10 +61,18 @@ class QLearningAgent:
     def get_value(self, state) -> float:
         return self.compute_value_from_Q_values(state)
 
+    def stop_learning(self) -> None:
+        self.epsilon = 0
+
+    def __hash__(self) -> int:
+        return self.name.__hash__()
+
 
 class ApproximateQAgent(QLearningAgent):
-    def __init__(self, feature_extractor, alpha=1.0, epsilon=0.05, discount=0.8):
-        super().__init__(alpha, epsilon, discount)
+    def __init__(
+        self, feature_extractor, name: str, alpha=1.0, epsilon=0.05, discount=0.8
+    ):
+        super().__init__(name, alpha, epsilon, discount)
         self.feat_extractor = feature_extractor
         self.weights = Counter()
 
