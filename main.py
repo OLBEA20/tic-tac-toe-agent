@@ -40,6 +40,22 @@ def update_agents(
         reward = 1 if winner == player.name or winner is None else -1
         for move in moves[player]:
             player.update(*move, reward)
+            if block(move, player.name):
+                player.update(*move, 4)
+
+
+def block(move, player_cell) -> bool:
+    action = move[1]
+    state = move[0]
+    lines = [state.row(action), state.column(action), *state.diagonal(action)]
+    for line in lines:
+        if (
+            len([cell for cell in line if cell != Cell.EMPTY and cell != player_cell])
+            == 2
+        ):
+            return True
+
+    return False
 
 
 def show_game(moments) -> None:
@@ -55,26 +71,27 @@ def show_game(moments) -> None:
 
 
 if __name__ == "__main__":
-    players = [
-        (QLearningAgent(Cell.O), lambda game, move: game.play_circle(move)),
-        (
-            ApproximateQAgent(SimpleExtractor(Cell.X), Cell.X),
-            lambda game, move: game.play_cross(move),
-        ),
-    ]
-    for _ in range(3000):
-        moments, players_move = play_game(players)
-        update_agents(players, players_move, moments[-1].winner())
-
-    for player, _ in players:
-        player.stop_learning()
-
     leaderboard = Counter()
-    for _ in range(1000):
-        moments, players_move = play_game(players)
-        leaderboard[moments[-1].winner()] += 1
-        # show_game(moments)
-        # input("Waiting")
+    for i in range(100):
+        players = [
+            (QLearningAgent(Cell.O), lambda game, move: game.play_circle(move)),
+            (
+                ApproximateQAgent(SimpleExtractor(Cell.X), Cell.X),
+                lambda game, move: game.play_cross(move),
+            ),
+        ]
+        for _ in range(3000):
+            moments, players_move = play_game(players)
+            update_agents(players, players_move, moments[-1].winner())
+
+        for player, _ in players:
+            player.stop_learning()
+
+        for _ in range(1000):
+            moments, players_move = play_game(players)
+            leaderboard[moments[-1].winner()] += 1
+            # show_game(moments)
+            # input("Waiting")
 
     print(leaderboard)
     # show_game(moments)

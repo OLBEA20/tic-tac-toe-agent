@@ -12,6 +12,9 @@ class FeatureExtractor(ABC):
         pass
 
 
+corner_positions = [Position(0, 0), Position(0, 2), Position(2, 0), Position(2, 2)]
+
+
 class SimpleExtractor(FeatureExtractor):
     def __init__(self, cell: Cell) -> None:
         self.cell = cell
@@ -37,6 +40,9 @@ class SimpleExtractor(FeatureExtractor):
                 count_block(self.cell, self.opponent_cell, lines_after_move)
                 - count_block(self.cell, self.opponent_cell, lines_before_move)
             ) / 2
+
+            features["corner-move"] = 0.2 if action in corner_positions else 0
+            features["center"] = 0.2 if action.x == 1 and action.y == 1 else 0
 
         return features
 
